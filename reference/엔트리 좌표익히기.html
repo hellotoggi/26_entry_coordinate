@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>엔트리 X,Y 좌표 활동지</title>
+<style>
+body{
+  font-family:'Arial', sans-serif;
+  background:#f4f9ff;
+  padding:20px;
+}
+.page{
+  max-width:950px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 4px 12px #ccc;
+}
+h1{text-align:center;color:#1f7acb;}
+.box{
+  background:#eef7ff;
+  padding:18px;
+  border-radius:18px;
+  margin:18px 0;
+}
+
+/* 1번 좌표판 */
+.stage{
+  width:600px;
+  height:325px;
+  border:5px solid #333;
+  margin:20px auto;
+  position:relative;
+  cursor:crosshair;
+  background-color:#fffdf2;
+  background-image:
+    linear-gradient(to right, rgba(150,150,150,0.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(150,150,150,0.18) 1px, transparent 1px);
+  background-size:25px 25px;
+}
+
+/* 2번 좌표판 */
+.miniStage{
+  width:600px;
+  height:325px;
+  border:5px solid #333;
+  margin:20px auto;
+  position:relative;
+  background-color:#fffdf2;
+  background-image:
+    linear-gradient(to right, rgba(150,150,150,0.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(150,150,150,0.18) 1px, transparent 1px);
+  background-size:25px 25px;
+}
+
+.xline{
+  position:absolute;top:50%;left:0;width:100%;
+  border-top:3px solid #ff7777;
+}
+.yline{
+  position:absolute;left:50%;top:0;height:100%;
+  border-left:3px solid #77aaff;
+}
+.center{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  background:#333;color:white;
+  padding:5px 10px;border-radius:12px;
+  font-weight:bold;
+  z-index:3;
+}
+.label{
+  position:absolute;font-weight:bold;font-size:20px;
+  z-index:3;
+}
+.left{left:8px;top:48%;color:#e22;}
+.right{right:8px;top:48%;color:#e22;}
+.top{top:8px;left:52%;color:#2266dd;}
+.bottom{bottom:8px;left:52%;color:#2266dd;}
+
+.coord{
+  position:absolute;
+  background:#222;
+  color:white;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:bold;
+  pointer-events:none;
+  display:none;
+  z-index:10;
+}
+.iconBox{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.btn{
+  font-size:22px;
+  padding:15px 20px;
+  border:3px solid #ddd;
+  border-radius:16px;
+  background:white;
+  cursor:pointer;
+}
+.btn:hover{background:#fff3c4;}
+.result{
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  margin-top:12px;
+  color:#1f7acb;
+}
+.car{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  font-size:40px;
+  transition:all 0.4s ease;
+  z-index:5;
+}
+.valueBox{
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+  color:#222;
+}
+.minus{color:#e22;}
+.plus{color:#2266dd;}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+<h1>🚗 엔트리 자율주행자동차 X,Y 좌표 배우기</h1>
+
+<div class="box">
+<h2>1. 마우스를 움직이며 좌표를 찾아요</h2>
+<p>아래 엔트리 실행화면 위에서 마우스를 움직여 보세요.</p>
+
+<div class="stage" id="stage">
+  <div class="xline"></div>
+  <div class="yline"></div>
+  <div class="center">(0,0)</div>
+  <div class="label left">X = -240<br>왼쪽</div>
+  <div class="label right">X = 240<br>오른쪽</div>
+  <div class="label top">Y = 130<br>위쪽</div>
+  <div class="label bottom">Y = -130<br>아래쪽</div>
+  <div class="coord" id="coord">(0,0)</div>
+</div>
+</div>
+
+<div class="box">
+<h2>2. 버튼을 눌러 좌표 변화를 확인해요</h2>
+<p>버튼을 한 번 누를 때마다 자동차가 <b>20씩</b> 움직여요.</p>
+
+<div class="miniStage">
+  <div class="xline"></div>
+  <div class="yline"></div>
+  <div class="center">(0,0)</div>
+  <div class="label left">X=-240</div>
+  <div class="label right">X=240</div>
+  <div class="label top">Y=130</div>
+  <div class="label bottom">Y=-130</div>
+  <div class="car" id="moveCar">🚗</div>
+</div>
+
+<div class="valueBox" id="moveValue">현재 좌표: X = 0, Y = 0</div>
+
+<div class="iconBox" style="margin-top:15px;">
+  <button class="btn" onclick="moveStep(-20,0)">⬅️ X -20</button>
+  <button class="btn" onclick="moveStep(20,0)">➡️ X +20</button>
+  <button class="btn" onclick="moveStep(0,20)">⬆️ Y +20</button>
+  <button class="btn" onclick="moveStep(0,-20)">⬇️ Y -20</button>
+  <button class="btn" onclick="resetCar()">🎯 중심점</button>
+</div>
+</div>
+
+<div class="box">
+<h2>3. 방향에 맞는 좌표를 골라요</h2>
+<p>자동차가 <b>오른쪽</b>으로 가려면 어떤 좌표를 선택할까요?</p>
+
+<div class="iconBox">
+  <button class="btn" onclick="check('q1','아쉬워요! 왼쪽은 X - 방향이에요')">⬅️ X -</button>
+  <button class="btn" onclick="check('q1','정답! 오른쪽은 X + 방향이에요 🚗➡️')">➡️ X +</button>
+  <button class="btn" onclick="check('q1','아쉬워요! 위쪽은 Y + 방향이에요')">⬆️ Y +</button>
+  <button class="btn" onclick="check('q1','아쉬워요! 아래쪽은 Y - 방향이에요')">⬇️ Y -</button>
+</div>
+<div class="result" id="q1"></div>
+</div>
+
+<div class="box">
+<h2>4. 좌표값을 보고 위치를 찾아요</h2>
+<p>자동차의 좌표가 <b>X = 0, Y = 130</b>이에요. 자동차는 어디에 있을까요?</p>
+
+<div class="iconBox">
+  <button class="btn" onclick="check('q2','아쉬워요! X=-240은 왼쪽이에요')">⬅️ 왼쪽</button>
+  <button class="btn" onclick="check('q2','아쉬워요! X=240은 오른쪽이에요')">➡️ 오른쪽</button>
+  <button class="btn" onclick="check('q2','정답! Y=130은 위쪽이에요 🚗⬆️')">⬆️ 위쪽</button>
+  <button class="btn" onclick="check('q2','아쉬워요! Y=-130은 아래쪽이에요')">⬇️ 아래쪽</button>
+  <button class="btn" onclick="check('q2','아쉬워요! 중심점은 X=0, Y=0이에요')">🎯 중심점</button>
+</div>
+<div class="result" id="q2"></div>
+</div>
+
+<div class="box">
+<h2>5. 미로 탈출 아이콘 퀴즈</h2>
+
+<p>① 자동차가 시작 위치로 돌아가야 해요. 어디를 눌러야 할까요?</p>
+<div class="iconBox">
+  <button class="btn" onclick="check('q3','아쉬워요! 왼쪽은 X=-240이에요')">⬅️</button>
+  <button class="btn" onclick="check('q3','아쉬워요! 오른쪽은 X=240이에요')">➡️</button>
+  <button class="btn" onclick="check('q3','아쉬워요! 위쪽은 Y=130이에요')">⬆️</button>
+  <button class="btn" onclick="check('q3','아쉬워요! 아래쪽은 Y=-130이에요')">⬇️</button>
+  <button class="btn" onclick="check('q3','정답! 중심점은 X=0, Y=0이에요 🎯')">🎯</button>
+</div>
+<div class="result" id="q3"></div>
+
+<p>② 자동차가 <b>X=-240</b> 위치로 가야 해요. 어느 방향일까요?</p>
+<div class="iconBox">
+  <button class="btn" onclick="check('q4','정답! X=-240은 왼쪽이에요 🚗⬅️')">⬅️</button>
+  <button class="btn" onclick="check('q4','아쉬워요! 오른쪽은 X=240이에요')">➡️</button>
+  <button class="btn" onclick="check('q4','아쉬워요! 위쪽은 Y=130이에요')">⬆️</button>
+  <button class="btn" onclick="check('q4','아쉬워요! 아래쪽은 Y=-130이에요')">⬇️</button>
+  <button class="btn" onclick="check('q4','아쉬워요! 중심점은 X=0, Y=0이에요')">🎯</button>
+</div>
+<div class="result" id="q4"></div>
+
+<p>③ 자동차가 <b>Y=-130</b> 위치로 가야 해요. 어느 방향일까요?</p>
+<div class="iconBox">
+  <button class="btn" onclick="check('q5','아쉬워요! 왼쪽은 X=-240이에요')">⬅️</button>
+  <button class="btn" onclick="check('q5','아쉬워요! 오른쪽은 X=240이에요')">➡️</button>
+  <button class="btn" onclick="check('q5','아쉬워요! 위쪽은 Y=130이에요')">⬆️</button>
+  <button class="btn" onclick="check('q5','정답! Y=-130은 아래쪽이에요 🚗⬇️')">⬇️</button>
+  <button class="btn" onclick="check('q5','아쉬워요! 중심점은 X=0, Y=0이에요')">🎯</button>
+</div>
+<div class="result" id="q5"></div>
+</div>
+
+</div>
+
+<script>
+const stage = document.getElementById("stage");
+const coord = document.getElementById("coord");
+
+stage.addEventListener("mousemove", function(e){
+  const rect = stage.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+
+  const x = Math.round((mouseX / rect.width) * 480 - 240);
+  const y = Math.round(130 - (mouseY / rect.height) * 260);
+
+  coord.style.display = "block";
+  coord.style.left = (mouseX + 15) + "px";
+  coord.style.top = (mouseY + 15) + "px";
+  coord.innerHTML = `X: ${x}, Y: ${y}`;
+});
+
+stage.addEventListener("mouseleave", function(){
+  coord.style.display = "none";
+});
+
+let currentX = 0;
+let currentY = 0;
+
+function moveStep(dx, dy){
+  currentX += dx;
+  currentY += dy;
+
+  if(currentX > 240) currentX = 240;
+  if(currentX < -240) currentX = -240;
+
+  if(currentY > 130) currentY = 130;
+  if(currentY < -130) currentY = -130;
+
+  updateCar();
+}
+
+function updateCar(){
+  const car = document.getElementById("moveCar");
+  const value = document.getElementById("moveValue");
+
+  const leftPercent = ((currentX + 240) / 480) * 100;
+  const topPercent = ((130 - currentY) / 260) * 100;
+
+  car.style.left = leftPercent + "%";
+  car.style.top = topPercent + "%";
+
+  value.innerHTML = `현재 좌표: X = ${currentX}, Y = ${currentY}`;
+}
+
+function resetCar(){
+  currentX = 0;
+  currentY = 0;
+  updateCar();
+}
+
+function check(id, text){
+  document.getElementById(id).innerHTML = text;
+}
+
+updateCar();
+</script>
+
+</body>
+</html>

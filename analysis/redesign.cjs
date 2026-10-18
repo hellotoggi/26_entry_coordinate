@@ -1,0 +1,10 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const dir=__dirname;
+const original=fs.readFileSync(path.join(dir,'activity-before-redesign.html'),'utf8');
+const model=original.match(/<script id="activity-model">([\s\S]*?)<\/script>/)[1];
+const bot=original.match(/const BOT_IMAGE=('data:image\/png;base64,[^']+');/)[1];
+let html=fs.readFileSync(path.join(dir,'activity-shell-v2.html'),'utf8');
+html=html.replace('__MODEL__',()=>model).replace('__BOT__',()=>bot).replace('__UI__',()=>fs.readFileSync(path.join(dir,'activity-ui-v2.js'),'utf8'));
+fs.writeFileSync(path.join(dir,'../index.html'),html);
+console.log('Updated standalone index.html');
